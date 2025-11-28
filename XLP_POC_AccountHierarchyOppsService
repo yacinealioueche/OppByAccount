@@ -1,0 +1,48 @@
+public with sharing class XLP_POC_AccountHierarchyOppsService{
+    @AuraEnabled(cacheable=true)
+    public static List<Opportunity> getHierarchyOpportunities(Id accountId) {
+
+        // 1) Collect this account + descendants up to 5 levels
+        Set<Id> allAccountIds = new Set<Id>{ accountId };
+        Set<Id> currentLevel  = new Set<Id>{ accountId };
+
+        Integer MAX_DEPTH = 5;
+
+        for (Integer i = 0; i < MAX_DEPTH && !currentLevel.isEmpty(); i++) {
+            List<Account> children = [
+                SELECT Id
+                FROM Account
+                WHERE ParentId IN :currentLevel
+            ];
+
+            currentLevel.clear();
+            for (Account a : children) {
+                if (!allAccountIds.contains(a.Id)) {
+                    allAccountIds.add(a.Id);
+                    currentLevel.add(a.Id);
+                }
+            }
+        }
+
+        // 2) Query opportunities for all these accounts
+        List<Opportunity> opps = [
+            SELECT Id, Name, StageName, Amount, CloseDate,
+                   AccountId, Account.Name, OwnerId
+            FROM Opportunity
+            WHERE AccountId IN :allAccountIds
+            ORDER BY CloseDate DESC NULLS LAST
+            LIMIT 5000
+        ];
+
+        return opps;
+    }
+
+    @AuraEnabled
+    public static void updateOpportunities(List<Opportunity> oppsToUpdate) {
+        // Minimal safety check
+        if (oppsToUpdate == null || oppsToUpdate.isEmpty()) return;
+
+        // DML; relies on field-level security & sharing
+        update oppsToUpdate;
+    }
+}
