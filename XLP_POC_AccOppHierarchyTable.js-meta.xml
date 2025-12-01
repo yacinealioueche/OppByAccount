@@ -2,15 +2,27 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>59.0</apiVersion>
     <isExposed>true</isExposed>
-    <masterLabel>Account Hierarchy Opportunities</masterLabel>
+    <masterLabel>XLP POC Account Opportunity Hierarchy Table</masterLabel>
+
     <targets>
         <target>lightning__RecordPage</target>
     </targets>
+
     <targetConfigs>
         <targetConfig targets="lightning__RecordPage">
             <objects>
                 <object>Account</object>
             </objects>
+
+            <property name="tableTitle" type="String" label="Table Title"/>
+            <property name="accountContextType" type="String" label="Account Context (Broker or Insured)"/>
+            <property name="pipelineType" type="String" label="Pipeline Type (Pipeline / Renewal / Both)"/>
+            <property name="newRenewalType" type="String" label="New/Renewal Filter (New / Renewal / Any)"/>
+            <property name="stageName" type="String" label="Stage Name (optional, e.g. Bound)"/>
+            <property name="requireExpiryDate" type="Boolean" label="Require Expiry Date >= Today"/>
+            <property name="sortField" type="String" label="Sort Field (e.g. XLP_GrossPremiumAXAXLAmount__c)"/>
+            <property name="sortDirection" type="String" label="Sort Direction (ASC or DESC)"/>
+            <property name="columns" type="String" label="Columns (e.g. Name,StageName,RelatedAccount,XLP_GrossPremiumAXAXLAmount__c)"/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
