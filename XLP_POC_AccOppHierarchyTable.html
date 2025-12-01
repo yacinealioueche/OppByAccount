@@ -1,13 +1,12 @@
 <template>
     <lightning-card title="Opportunities in Account Hierarchy" icon-name="standard:opportunity">
+
         <div class="slds-p-horizontal_small slds-p-bottom_small">
 
-            <!-- Loading spinner -->
             <template if:true={isLoading}>
-                <lightning-spinner alternative-text="Loading opportunities" size="small"></lightning-spinner>
+                <lightning-spinner alternative-text="Loading opportunities"></lightning-spinner>
             </template>
 
-            <!-- Data table -->
             <template if:true={hasData}>
                 <lightning-datatable
                     key-field="Id"
@@ -17,13 +16,30 @@
                     onsave={handleSave}
                     draft-values={draftValues}>
                 </lightning-datatable>
+
+                <!-- PAGINATION -->
+                <div class="paginator slds-m-top_small slds-grid slds-grid_align-spread">
+                    <lightning-button label="Previous"
+                                     onclick={handlePrev}
+                                     disabled={isFirstPage}
+                                     icon-name="utility:chevronleft">
+                    </lightning-button>
+
+                    <span>
+                        Page {pageNumber} of {totalPages}
+                    </span>
+
+                    <lightning-button label="Next"
+                                     onclick={handleNext}
+                                     disabled={isLastPage}
+                                     icon-name="utility:chevronright"
+                                     icon-position="right">
+                    </lightning-button>
+                </div>
             </template>
 
-            <!-- Empty state -->
             <template if:false={hasData}>
-                <p class="slds-text-body_regular slds-m-top_small slds-text-color_weak">
-                    No opportunities found for this account or its descendants.
-                </p>
+                <p class="slds-text-color_weak">No opportunities found.</p>
             </template>
 
         </div>
