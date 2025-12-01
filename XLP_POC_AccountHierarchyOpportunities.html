@@ -1,0 +1,31 @@
+<template>
+    <lightning-card title="Opportunities in Account Hierarchy" icon-name="standard:opportunity">
+        <div class="slds-p-horizontal_small slds-p-bottom_small">
+
+            <!-- Loading spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading opportunities" size="small"></lightning-spinner>
+            </template>
+
+            <!-- Data table -->
+            <template if:true={hasData}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={tableData}
+                    columns={columns}
+                    hide-checkbox-column
+                    onsave={handleSave}
+                    draft-values={draftValues}>
+                </lightning-datatable>
+            </template>
+
+            <!-- Empty state -->
+            <template if:false={hasData}>
+                <p class="slds-text-body_regular slds-m-top_small slds-text-color_weak">
+                    No opportunities found for this account or its descendants.
+                </p>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>
