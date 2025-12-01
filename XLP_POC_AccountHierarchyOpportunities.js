@@ -2,8 +2,8 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 
-import getHierarchyOpportunities from '@salesforce/apex/XLP_POC_AccountHierarchyOpportunityController.getHierarchyOpportunities';
-import updateOpportunities from '@salesforce/apex/XLP_POC_AccountHierarchyOpportunityController.updateOpportunities';
+import getHierarchyOpportunities from '@salesforce/apex/XLP_POC_AccHierarchyOppCtrl.getHierarchyOpportunities';
+import updateOpportunities from '@salesforce/apex/XLP_POC_AccHierarchyOppCtrl.updateOpportunities';
 
 const COLUMNS = [
     {
