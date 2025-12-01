@@ -1,7 +1,5 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { refreshApex } from '@salesforce/apex';
-
 import getHierarchyOpportunities from '@salesforce/apex/XLP_POC_AccOppHierarchyTable.getHierarchyOpportunities';
 import updateOpportunities from '@salesforce/apex/XLP_POC_AccOppHierarchyTable.updateOpportunities';
 
@@ -10,115 +8,108 @@ const COLUMNS = [
         label: 'Opportunity Name',
         fieldName: 'oppLink',
         type: 'url',
-        typeAttributes: {
-            label: { fieldName: 'Name' },
-            target: '_blank'
-        }
+        typeAttributes: { label: { fieldName: 'Name' }, target: '_blank' }
     },
+    { label: 'Stage', fieldName: 'StageName', editable: true },
+    { label: 'Amount', fieldName: 'Amount', type: 'currency', editable: true },
+    { label: 'Close Date', fieldName: 'CloseDate', type: 'date', editable: true },
     {
-        label: 'Stage',
-        fieldName: 'StageName',
-        type: 'text',
-        editable: true
-    },
-    {
-        label: 'Amount',
-        fieldName: 'Amount',
-        type: 'currency',
-        editable: true
-    },
-    {
-        label: 'Close Date',
-        fieldName: 'CloseDate',
-        type: 'date',
-        editable: true
-    },
-    {
-        label: 'Account',
+        label: 'Broker Account',
         fieldName: 'accountLink',
         type: 'url',
-        typeAttributes: {
-            label: { fieldName: 'AccountName' },
-            target: '_blank'
-        }
+        typeAttributes: { label: { fieldName: 'AccountName' }, target: '_blank' }
     }
 ];
 
 export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
-    @api recordId; // Account Id from the record page
 
+    @api recordId;
     columns = COLUMNS;
 
+    @track allData = [];
     @track tableData = [];
     @track draftValues = [];
-    @track isLoading = false;
+    @track isLoading = true;
 
-    wiredResult; // to use with refreshApex
+    pageSize = 10;
+    pageNumber = 1;
 
+    // WIRE DATA
     @wire(getHierarchyOpportunities, { accountId: '$recordId' })
-    wiredOpportunities(result) {
-        this.wiredResult = result;
+    wiredOpps({ data, error }) {
+        this.isLoading = false;
 
-        const { data, error } = result;
         if (data) {
-            this.isLoading = false;
-            this.tableData = data.map(opp => ({
+            this.allData = data.map(opp => ({
                 ...opp,
                 oppLink: '/' + opp.Id,
                 accountLink: opp.XLP_BrokerName__c ? '/' + opp.XLP_BrokerName__c : null,
-                AccountName: opp.XLP_BrokerName__c ? opp.XLP_BrokerName__r.Name : null
+                AccountName: opp.XLP_BrokerName__r ? opp.XLP_BrokerName__r.Name : ''
             }));
+            this.pageNumber = 1;
+            this.updatePagination();
         } else if (error) {
-            this.isLoading = false;
-            this.tableData = [];
-            this.showToast('Error loading opportunities', this.reduceError(error), 'error');
+            this.showToast('Error', this.reduceError(error), 'error');
+            this.allData = [];
         }
     }
 
-    get hasData() {
-        return this.tableData && this.tableData.length > 0;
+    // PAGINATION
+    updatePagination() {
+        const start = (this.pageNumber - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        this.tableData = this.allData.slice(start, end);
     }
 
+    handleNext() {
+        this.pageNumber++;
+        this.updatePagination();
+    }
+
+    handlePrev() {
+        this.pageNumber--;
+        this.updatePagination();
+    }
+
+    get totalPages() {
+        return Math.ceil(this.allData.length / this.pageSize);
+    }
+
+    get isFirstPage() {
+        return this.pageNumber <= 1;
+    }
+
+    get isLastPage() {
+        return this.pageNumber >= this.totalPages;
+    }
+
+    get hasData() {
+        return this.allData.length > 0;
+    }
+
+    // INLINE SAVE
     async handleSave(event) {
         this.isLoading = true;
 
-        const updatedFields = event.detail.draftValues;
-
         try {
-            await updateOpportunities({ opportunities: updatedFields });
+            await updateOpportunities({ opportunities: event.detail.draftValues });
+            this.showToast('Success', 'Updated successfully', 'success');
 
-            this.showToast('Success', 'Opportunities updated', 'success');
-
-            // Clear draft values and refresh data
-            this.draftValues = [];
-            await refreshApex(this.wiredResult);
+            // Force reload
+            window.location.reload();
         } catch (error) {
-            this.showToast('Error updating opportunities', this.reduceError(error), 'error');
-        } finally {
+            this.showToast('Error', this.reduceError(error), 'error');
             this.isLoading = false;
         }
     }
 
     showToast(title, message, variant) {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title,
-                message,
-                variant
-            })
-        );
+        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
     }
 
-    // Helper to flatten error messages
     reduceError(error) {
-        if (!error) {
-            return 'Unknown error';
-        }
-        if (Array.isArray(error.body)) {
-            return error.body.map(e => e.message).join(', ');
-        } else if (error.body && typeof error.body.message === 'string') {
-            return error.body.message;
-        }
-        return error.message || 'Unknown error';
+        if (Array.isArray(error.body)) return error.body.map(e => e.message).join(', ');
+        if (typeof error.body?.message === 'string') return error.body.message;
+        return 'Unknown error';
     }
 }
