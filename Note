@@ -10,3 +10,7 @@ If so, change in HTML:
 
 
 and remove the get columns() from JS.
+
+Error:
+Proxy.buildColumns()@modules/c/xLP_POC_AccOppHierarchyTable.js:3:3428
+Proxy.connectedCallback()@modules/c/xLP_POC_AccOppHierarchyTable.js:3:3296
