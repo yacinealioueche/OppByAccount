@@ -2,8 +2,8 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 
-import getHierarchyOpportunities from '@salesforce/apex/XLP_POC_AccHierarchyOppCtrl.getHierarchyOpportunities';
-import updateOpportunities from '@salesforce/apex/XLP_POC_AccHierarchyOppCtrl.updateOpportunities';
+import getHierarchyOpportunities from '@salesforce/apex/XLP_POC_AccOppHierarchyTable.getHierarchyOpportunities';
+import updateOpportunities from '@salesforce/apex/XLP_POC_AccOppHierarchyTable.updateOpportunities';
 
 const COLUMNS = [
     {
@@ -44,7 +44,7 @@ const COLUMNS = [
     }
 ];
 
-export default class XLP_POC_AccountHierarchyOpportunities extends LightningElement {
+export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
     @api recordId; // Account Id from the record page
 
     columns = COLUMNS;
