@@ -65,8 +65,8 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
             this.tableData = data.map(opp => ({
                 ...opp,
                 oppLink: '/' + opp.Id,
-                accountLink: opp.AccountId ? '/' + opp.AccountId : null,
-                AccountName: opp.Account ? opp.Account.Name : null
+                accountLink: opp.XLP_BrokerName__c ? '/' + opp.XLP_BrokerName__c : null,
+                AccountName: opp.XLP_BrokerName__c ? opp.XLP_BrokerName__r.Name : null
             }));
         } else if (error) {
             this.isLoading = false;
