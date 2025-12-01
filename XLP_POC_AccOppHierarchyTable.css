@@ -5,3 +5,7 @@
 lightning-datatable {
     margin-top: 0.5rem;
 }
+
+.paginator {
+    padding-top: 8px;
+}
