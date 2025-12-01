@@ -1,4 +1,4 @@
-public with sharing class XLP_POC_AccountHierarchyOpportunityController {
+public with sharing class XLP_POC_AccHierarchyOppCtrl {
 
     // Max depth of account hierarchy to traverse
     private static final Integer MAX_DEPTH = 5;
