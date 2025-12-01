@@ -1,0 +1,7 @@
+:host {
+    display: block;
+}
+
+lightning-datatable {
+    margin-top: 0.5rem;
+}
