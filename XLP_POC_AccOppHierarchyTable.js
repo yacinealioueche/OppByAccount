@@ -1,4 +1,5 @@
 import { LightningElement, api, track, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getHierarchyOpportunities from '@salesforce/apex/XLP_POC_AccOppHierarchyTable.getHierarchyOpportunities';
 import updateOpportunities from '@salesforce/apex/XLP_POC_AccOppHierarchyTable.updateOpportunities';
@@ -191,29 +192,36 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
 
     // ----- INLINE SAVE -----
     async handleSave(event) {
-        this.isLoading = true;
-        const updatedFields = event.detail.draftValues;
+    this.isLoading = true;
+    const updatedFields = event.detail.draftValues;
 
-        try {
-            await updateOpportunities({ opportunities: updatedFields });
-            this.showToast(
-                'Success',
-                'Opportunities updated successfully',
-                'success'
-            );
-            this.draftValues = [];
-            // Let wire refresh naturally
+    try {
+        await updateOpportunities({ opportunities: updatedFields });
+
+        this.showToast(
+            'Success',
+            'Changes saved successfully',
+            'success'
+        );
+
+        //Clear drafts
+        this.draftValues = [];
+
+        //Reload from DB
+        await refreshApex(this.wiredResult);
+
         } catch (error) {
+    
             this.showToast(
                 'Error updating opportunities',
                 this.reduceError(error),
                 'error'
             );
+    
         } finally {
             this.isLoading = false;
         }
     }
-
     // ----- UTILITIES -----
     showToast(title, message, variant) {
         this.dispatchEvent(
