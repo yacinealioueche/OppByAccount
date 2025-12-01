@@ -1,0 +1,12 @@
+Note: if you get a conflict with getter/setter name columns, just rename the internal one, e.g. columnsDef and use that directly in HTML (columns={columnsDef}).
+
+If so, change in HTML:
+
+<lightning-datatable
+    ...
+    columns={columnsDef}
+    ...>
+</lightning-datatable>
+
+
+and remove the get columns() from JS.
