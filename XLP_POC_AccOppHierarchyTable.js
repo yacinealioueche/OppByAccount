@@ -4,23 +4,25 @@ import getHierarchyOpportunities from '@salesforce/apex/XLP_POC_AccOppHierarchyT
 import updateOpportunities from '@salesforce/apex/XLP_POC_AccOppHierarchyTable.updateOpportunities';
 
 export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
+
     @api recordId;
 
-    // Configurable inputs from App Builder
+    // ---- Configurable from App Builder ----
     @api tableTitle;
     @api accountContextType;   // 'Broker' or 'Insured'
     @api pipelineType;         // 'Pipeline' | 'Renewal' | 'Both'
     @api newRenewalType;       // 'New' | 'Renewal' | 'Any'
     @api stageName;            // e.g. 'Bound'
-    @api requireExpiryDate;    // true/false
-    @api sortField;            // e.g. 'XLP_GrossPremiumAXAXLAmount__c'
-    @api sortDirection;        // 'ASC' / 'DESC'
-    @api columns;              // comma separated: "Name,StageName,RelatedAccount,XLP_GrossPremiumAXAXLAmount__c"
+    @api requireExpiryDate;    // true / false
+    @api sortField;            // e.g. XLP_GrossPremiumAXAXLAmount__c
+    @api sortDirection;        // ASC / DESC
 
+    _columns;                  // internal holder
+
+    @track columnsDef = [];
     @track allData = [];
     @track tableData = [];
     @track draftValues = [];
-    @track columnsDef = [];
     @track isLoading = true;
 
     pageSize = 10;
@@ -28,24 +30,34 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
 
     wiredResult;
 
+    // ----- ATTRIBUTE SETTER FOR COLUMNS -----
+    @api
+    set columns(value) {
+        this._columns = value;
+        this.buildColumns();
+    }
+
+    get columns() {
+        return this._columns;
+    }
+
     connectedCallback() {
         this.buildColumns();
     }
 
-    // Build datatable columns based on comma-separated "columns" input
+    // ----- BUILD COLUMNS SAFELY -----
     buildColumns() {
-        const cols = [];
+        this.columnsDef = [];
 
-        if (!this.columns) {
-            // Default columns if none specified
-            this.columns = 'Name,StageName,RelatedAccount,Amount,CloseDate';
-        }
+        const raw = (typeof this._columns === 'string' && this._columns.trim())
+            ? this._columns
+            : 'Name,StageName,RelatedAccount,Amount,CloseDate'; // default
 
-        const parts = this.columns.split(',').map(c => c.trim()).filter(Boolean);
+        const parts = raw.split(',').map(c => c.trim()).filter(Boolean);
 
         parts.forEach(field => {
             if (field === 'Name') {
-                cols.push({
+                this.columnsDef.push({
                     label: 'Opportunity Name',
                     fieldName: 'oppLink',
                     type: 'url',
@@ -54,9 +66,12 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
                         target: '_blank'
                     }
                 });
-            } else if (field === 'RelatedAccount') {
-                cols.push({
-                    label: this.accountContextType === 'Insured' ? 'Insured Account' : 'Broker Account',
+            }
+            else if (field === 'RelatedAccount') {
+                this.columnsDef.push({
+                    label: this.accountContextType === 'Insured'
+                        ? 'Insured Account'
+                        : 'Broker Account',
                     fieldName: 'relatedAccountLink',
                     type: 'url',
                     typeAttributes: {
@@ -64,9 +79,10 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
                         target: '_blank'
                     }
                 });
-            } else {
-                // infer type
+            }
+            else {
                 let type = 'text';
+
                 if (field.toLowerCase().includes('date')) {
                     type = 'date';
                 } else if (
@@ -75,22 +91,18 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
                 ) {
                     type = 'currency';
                 }
-                cols.push({
+
+                this.columnsDef.push({
                     label: field,
                     fieldName: field,
-                    type: type,
+                    type,
                     editable: true
                 });
             }
         });
-
-        this.columnsDef = cols;
     }
 
-    get columns() {
-        return this.columnsDef;
-    }
-
+    // ----- WIRE OPPORTUNITIES -----
     @wire(getHierarchyOpportunities, {
         accountId: '$recordId',
         accountContextType: '$accountContextType',
@@ -107,16 +119,19 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         this.isLoading = false;
 
         if (data) {
-            // Enrich rows with links and related account name
             this.allData = data.map(opp => {
                 let relatedAccountId, relatedAccountName;
 
                 if (this.accountContextType === 'Insured') {
                     relatedAccountId = opp.XLP_ClientName__c;
-                    relatedAccountName = opp.XLP_ClientName__r ? opp.XLP_ClientName__r.Name : null;
+                    relatedAccountName = opp.XLP_ClientName__r
+                        ? opp.XLP_ClientName__r.Name
+                        : null;
                 } else {
                     relatedAccountId = opp.XLP_BrokerName__c;
-                    relatedAccountName = opp.XLP_BrokerName__r ? opp.XLP_BrokerName__r.Name : null;
+                    relatedAccountName = opp.XLP_BrokerName__r
+                        ? opp.XLP_BrokerName__r.Name
+                        : null;
                 }
 
                 return {
@@ -129,14 +144,19 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
 
             this.pageNumber = 1;
             this.updatePagination();
+
         } else if (error) {
-            this.showToast('Error loading opportunities', this.reduceError(error), 'error');
+            this.showToast(
+                'Error loading opportunities',
+                this.reduceError(error),
+                'error'
+            );
             this.allData = [];
             this.tableData = [];
         }
     }
 
-    // Pagination helpers
+    // ----- PAGINATION -----
     updatePagination() {
         const start = (this.pageNumber - 1) * this.pageSize;
         const end = start + this.pageSize;
@@ -169,25 +189,32 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         return this.allData.length > 0;
     }
 
-    // Inline save
+    // ----- INLINE SAVE -----
     async handleSave(event) {
         this.isLoading = true;
         const updatedFields = event.detail.draftValues;
 
         try {
             await updateOpportunities({ opportunities: updatedFields });
-            this.showToast('Success', 'Opportunities updated', 'success');
+            this.showToast(
+                'Success',
+                'Opportunities updated successfully',
+                'success'
+            );
             this.draftValues = [];
-            // Requery wire
-            // We can just call updatePagination after wire refresh, but simplest is to rely on wire
-            // Reassigning wired property triggers refresh automatically on next change
+            // Let wire refresh naturally
         } catch (error) {
-            this.showToast('Error updating opportunities', this.reduceError(error), 'error');
+            this.showToast(
+                'Error updating opportunities',
+                this.reduceError(error),
+                'error'
+            );
         } finally {
             this.isLoading = false;
         }
     }
 
+    // ----- UTILITIES -----
     showToast(title, message, variant) {
         this.dispatchEvent(
             new ShowToastEvent({
@@ -200,9 +227,11 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
 
     reduceError(error) {
         if (!error) return 'Unknown error';
+
         if (Array.isArray(error.body)) {
             return error.body.map(e => e.message).join(', ');
-        } else if (error.body && typeof error.body.message === 'string') {
+        }
+        if (error.body && typeof error.body.message === 'string') {
             return error.body.message;
         }
         return error.message || 'Unknown error';
