@@ -28,9 +28,11 @@ public with sharing class XLP_POC_AccOppHierarchyTable {
                    CloseDate,
                    AccountId,
                    Account.Name,
+                   XLP_BrokerName__c,
+                   XLP_BrokerName__r.Name,
                    OwnerId
             FROM Opportunity
-            WHERE AccountId IN :accountIds
+            WHERE XLP_BrokerName__c IN :accountIds
             ORDER BY CloseDate DESC
             LIMIT 2000
         ];
