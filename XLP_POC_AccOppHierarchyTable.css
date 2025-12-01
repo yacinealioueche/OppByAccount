@@ -1,11 +1,12 @@
-:host {
-    display: block;
-}
-
 lightning-datatable {
     margin-top: 0.5rem;
 }
 
-.paginator {
-    padding-top: 8px;
+:host {
+    display: block;
 }
+
+.paginator {
+    padding-top: 0.5rem;
+}
+
