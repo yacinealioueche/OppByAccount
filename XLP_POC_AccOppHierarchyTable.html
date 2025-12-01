@@ -1,45 +1,51 @@
 <template>
-    <lightning-card title="Opportunities in Account Hierarchy" icon-name="standard:opportunity">
-
+    <lightning-card title={tableTitle} icon-name="standard:opportunity">
         <div class="slds-p-horizontal_small slds-p-bottom_small">
 
+            <!-- Loading -->
             <template if:true={isLoading}>
-                <lightning-spinner alternative-text="Loading opportunities"></lightning-spinner>
+                <lightning-spinner alternative-text="Loading..." size="small"></lightning-spinner>
             </template>
 
+            <!-- Table -->
             <template if:true={hasData}>
                 <lightning-datatable
                     key-field="Id"
                     data={tableData}
                     columns={columns}
                     hide-checkbox-column
-                    onsave={handleSave}
-                    draft-values={draftValues}>
+                    draft-values={draftValues}
+                    onsave={handleSave}>
                 </lightning-datatable>
 
-                <!-- PAGINATION -->
+                <!-- Pagination -->
                 <div class="paginator slds-m-top_small slds-grid slds-grid_align-spread">
-                    <lightning-button label="Previous"
-                                     onclick={handlePrev}
-                                     disabled={isFirstPage}
-                                     icon-name="utility:chevronleft">
+                    <lightning-button
+                        label="Previous"
+                        onclick={handlePrev}
+                        disabled={isFirstPage}
+                        icon-name="utility:chevronleft">
                     </lightning-button>
 
-                    <span>
-                        Page {pageNumber} of {totalPages}
-                    </span>
+                    <span>Page {pageNumber} of {totalPages}</span>
 
-                    <lightning-button label="Next"
-                                     onclick={handleNext}
-                                     disabled={isLastPage}
-                                     icon-name="utility:chevronright"
-                                     icon-position="right">
+                    <lightning-button
+                        label="Next"
+                        onclick={handleNext}
+                        disabled={isLastPage}
+                        icon-name="utility:chevronright"
+                        icon-position="right">
                     </lightning-button>
                 </div>
             </template>
 
+            <!-- Empty state -->
             <template if:false={hasData}>
-                <p class="slds-text-color_weak">No opportunities found.</p>
+                <template if:false={isLoading}>
+                    <p class="slds-text-color_weak slds-m-top_small">
+                        No opportunities found for this configuration.
+                    </p>
+                </template>
             </template>
 
         </div>
