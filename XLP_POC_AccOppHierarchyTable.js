@@ -96,6 +96,13 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
                         target: '_blank'
                     }
                 });
+            }else if (field === 'XLP_GrossPremiumAXAXLAmount__c') {
+                this.columnsDef.push({
+                    label: 'Gross Premium Amount',
+                    fieldName: 'XLP_GrossPremiumAXAXLAmount__c',
+                    type: 'currency',
+                    editable: true
+                });
             } else {
                 let type = 'text';
 
@@ -138,19 +145,15 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         console.log(data);
         if (data) {
             this.allData = data.map(opp => {
-
                 // Broker
                 const brokerId = opp.XLP_BrokerName__c;
                 const brokerName = opp.XLP_BrokerName__r ? opp.XLP_BrokerName__r.Name : null;
-            
                 // Insured
                 const insuredId = opp.XLP_ClientName__c;
                 const insuredName = opp.XLP_ClientName__r ? opp.XLP_ClientName__r.Name : null;
-            
                 // Owner
                 const ownerId = opp.OwnerId;
-                const ownerName = opp.Owner ? opp.Owner.Name : null;
-                
+                const ownerName = opp.Owner ? opp.Owner.Name : null;        
                 return {
                     ...opp,
                     
