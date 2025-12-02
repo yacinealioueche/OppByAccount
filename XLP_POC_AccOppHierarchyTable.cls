@@ -57,6 +57,7 @@ public with sharing class XLP_POC_AccOppHierarchyTable {
                 'XLP_ClientName__c, XLP_ClientName__r.Name, ' +
                 'XLP_BrokerName__c, XLP_BrokerName__r.Name, ' +
                 'XLP_InceptionDate__c, XLP_ExpiryRenewalDate__c, ' +
+                'OwnerId, Owner.Name, ' +
                 'XLP_GrossPremiumAXAXLAmount__c, XLP_NewRenewal__c, RecordType.Name ' +
                 'FROM Opportunity ' +
                 'WHERE ' + accountField + ' IN :accountIds ';
