@@ -51,7 +51,7 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
 
         const raw = (typeof this._columns === 'string' && this._columns.trim())
             ? this._columns
-            : 'Name,StageName,RelatedAccount,Amount,CloseDate'; // default
+            : 'Name,StageName,RelatedAccount'; // default
 
         const parts = raw.split(',').map(c => c.trim()).filter(Boolean);
 
@@ -110,7 +110,7 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         newRenewalType: '$newRenewalType',
         stageName: '$stageName',
         requireExpiryDate: '$normalizedRequireExpiryDate',
-        requireInceptionDate: '$requireInceptionDate',
+        requireInceptionDate: '$normalizedRequireInceptionDate',
         sortField: '$sortField',
         sortDirection: '$sortDirection'
     })
@@ -193,6 +193,10 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
 
     get normalizedRequireExpiryDate() {
         return this.normalizeBoolean(this.requireExpiryDate);
+    }
+
+    get normalizedRequireInceptionDate() {
+        return this.normalizeBoolean(this.requireInceptionDate);
     }
 
     // ----- INLINE SAVE -----
