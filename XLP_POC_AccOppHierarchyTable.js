@@ -16,6 +16,7 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
     @api requireInceptionDate;    // true / false
     @api sortField;            // e.g. XLP_GrossPremiumAXAXLAmount__c
     @api sortDirection;        // ASC / DESC
+    @api sumField;             // Gross Premium or Estimated Premium
 
     _columns;                  // internal holder
 
@@ -24,6 +25,8 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
     @track tableData = [];
     @track draftValues = [];
     @track isLoading = true;
+    @track totalValue = 0;
+
 
     pageSize = 10;
     pageNumber = 1;
@@ -173,7 +176,8 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
                     OwnerName: ownerName
                 };
             });
-            
+
+            this.calculateTotal();
             this.pageNumber = 1;
             this.updatePagination();
 
@@ -248,6 +252,7 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
     
             //Reload from DB
             await refreshApex(this.wiredResult);
+            this.calculateTotal();
     
             } catch (error) {
         
@@ -285,7 +290,28 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         return error.message || 'Unknown error';
     }
 
+    //Used to initiate the boolean attributes
     normalizeBoolean(value) {
         return value === true || value === 'true';
     }
+
+    //Generic Method to calculate the Total Gross Premium or Estimated Premium
+    calculateTotal() {
+        if (!this.sumField) {
+            this.totalValue = null;
+            return;
+        }
+    
+        let total = 0;
+    
+        this.allData.forEach(row => {
+            const val = row[this.sumField];
+            if (typeof val === 'number') {
+                total += val;
+            }
+        });
+    
+        this.totalValue = total;
+    }
+
 }
