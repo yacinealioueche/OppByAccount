@@ -24,6 +24,8 @@
             <property name="sortField" type="String" label="Sort Field (e.g. XLP_GrossPremiumAXAXLAmount__c)"/>
             <property name="sortDirection" type="String" label="Sort Direction (ASC or DESC)"/>
             <property name="columns" type="String" label="Columns (e.g. Name,StageName,RelatedAccount,XLP_GrossPremiumAXAXLAmount__c)"/>
+            <property name="sumField" type="String" label="Field to Sum (e.g. XLP_GrossPremiumAXAXLAmount__c or Amount)" description="API name of the numeric field to total"/>
+
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
