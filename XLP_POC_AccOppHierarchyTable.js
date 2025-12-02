@@ -250,4 +250,8 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         }
         return error.message || 'Unknown error';
     }
+
+    normalizeBoolean(value) {
+        return value === true || value === 'true';
+    }
 }
