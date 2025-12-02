@@ -109,7 +109,7 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         pipelineType: '$pipelineType',
         newRenewalType: '$newRenewalType',
         stageName: '$stageName',
-        requireExpiryDate: '$requireExpiryDate',
+        requireExpiryDate: '$normalizedRequireExpiryDate',
         requireInceptionDate: '$requireInceptionDate',
         sortField: '$sortField',
         sortDirection: '$sortDirection'
@@ -189,6 +189,10 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
 
     get hasData() {
         return this.allData.length > 0;
+    }
+
+    get normalizedRequireExpiryDate() {
+        return this.normalizeBoolean(this.requireExpiryDate);
     }
 
     // ----- INLINE SAVE -----
