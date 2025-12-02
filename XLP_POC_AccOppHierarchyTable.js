@@ -66,21 +66,37 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
                         target: '_blank'
                     }
                 });
-            }
-            else if (field === 'RelatedAccount') {
+            }else if (field === 'Broker') {
                 this.columnsDef.push({
-                    label: this.accountContextType === 'Insured'
-                        ? 'Insured Account'
-                        : 'Broker Account',
-                    fieldName: 'relatedAccountLink',
+                    label: 'Broker',
+                    fieldName: 'brokerLink',
                     type: 'url',
                     typeAttributes: {
-                        label: { fieldName: 'RelatedAccountName' },
+                        label: { fieldName: 'BrokerName' },
                         target: '_blank'
                     }
                 });
-            }
-            else {
+            }else if (field === 'Insured') {
+                this.columnsDef.push({
+                    label: 'Insured',
+                    fieldName: 'insuredLink',
+                    type: 'url',
+                    typeAttributes: {
+                        label: { fieldName: 'InsuredName' },
+                        target: '_blank'
+                    }
+                });
+            }else if (field === 'Owner') {
+                this.columnsDef.push({
+                    label: 'Owner',
+                    fieldName: 'ownerLink',
+                    type: 'url',
+                    typeAttributes: {
+                        label: { fieldName: 'OwnerName' },
+                        target: '_blank'
+                    }
+                });
+            } else {
                 let type = 'text';
 
                 if (field.toLowerCase().includes('date')) {
@@ -122,28 +138,39 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         console.log(data);
         if (data) {
             this.allData = data.map(opp => {
-                let relatedAccountId, relatedAccountName;
 
-                if (this.accountContextType === 'Insured') {
-                    relatedAccountId = opp.XLP_ClientName__c;
-                    relatedAccountName = opp.XLP_ClientName__r
-                        ? opp.XLP_ClientName__r.Name
-                        : null;
-                } else {
-                    relatedAccountId = opp.XLP_BrokerName__c;
-                    relatedAccountName = opp.XLP_BrokerName__r
-                        ? opp.XLP_BrokerName__r.Name
-                        : null;
-                }
-
+                // Broker
+                const brokerId = opp.XLP_BrokerName__c;
+                const brokerName = opp.XLP_BrokerName__r ? opp.XLP_BrokerName__r.Name : null;
+            
+                // Insured
+                const insuredId = opp.XLP_ClientName__c;
+                const insuredName = opp.XLP_ClientName__r ? opp.XLP_ClientName__r.Name : null;
+            
+                // Owner
+                const ownerId = opp.OwnerId;
+                const ownerName = opp.Owner ? opp.Owner.Name : null;
+                
                 return {
                     ...opp,
+                    
+                    // Opportunity link
                     oppLink: '/' + opp.Id,
-                    relatedAccountLink: relatedAccountId ? '/' + relatedAccountId : null,
-                    RelatedAccountName: relatedAccountName
+            
+                    // Broker link
+                    brokerLink: brokerId ? '/' + brokerId : null,
+                    BrokerName: brokerName,
+            
+                    // Insured link
+                    insuredLink: insuredId ? '/' + insuredId : null,
+                    InsuredName: insuredName,
+            
+                    // Owner link
+                    ownerLink: ownerId ? '/' + ownerId : null,
+                    OwnerName: ownerName
                 };
             });
-
+            
             this.pageNumber = 1;
             this.updatePagination();
 
