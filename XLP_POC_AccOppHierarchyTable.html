@@ -1,4 +1,14 @@
 <template>
+    <template if:true={sumField}>
+        <div class="summary-bar slds-box slds-theme_shade slds-m-bottom_small">
+            <strong>Total:</strong>
+            <lightning-formatted-number
+                value={totalValue}
+                format-style="currency">
+            </lightning-formatted-number>
+        </div>
+    </template>
+
     <lightning-card title={tableTitle} icon-name="standard:opportunity">
         <div class="slds-p-horizontal_small slds-p-bottom_small">
 
