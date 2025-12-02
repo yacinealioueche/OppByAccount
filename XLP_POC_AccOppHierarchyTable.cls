@@ -8,7 +8,7 @@ public with sharing class XLP_POC_AccOppHierarchyTable {
         String accountContextType,   // 'Broker' or 'Insured'
         String pipelineType,         // 'Pipeline' | 'Renewal' | 'Both'
         String newRenewalType,       // 'New' | 'Renewal' | 'Any'
-        String stageName,            // e.g. 'Bound' or null
+        String stageName,            // e.g. 'Bound' or Any
         Boolean requireExpiryDate,   // true/false
         Boolean requireInceptionDate,   // true/false
         String sortField,
@@ -38,12 +38,9 @@ public with sharing class XLP_POC_AccOppHierarchyTable {
             // 3) Build SOQL dynamically 
             //    Whitelist sortField and sortDirection
             Set<String> allowedSortFields = new Set<String>{
-                'CloseDate',
                 'XLP_InceptionDate__c',
                 'XLP_ExpiryRenewalDate__c',
-                'XLP_GrossPremiumAXAXLAmount__c',
-                'Amount',
-                'Name'
+                'XLP_GrossPremiumAXAXLAmount__c'
             };
 
             String safeSortField = allowedSortFields.contains(sortField)
@@ -85,27 +82,29 @@ public with sharing class XLP_POC_AccOppHierarchyTable {
                 baseQuery += ' AND XLP_NewRenewal__c = :newRenewalType ';
             }
 
-            // 7) StageName filter (generic, not just Bound)
-            if (stageName != null && stageName.trim().length() > 0) {
+            // 7) StageName filter (generic)
+            if (stageName != null && stageName != 'Any') {
                 baseQuery += ' AND StageName = :stageName ';
+            }else if(stageName == 'Any'){
+                baseQuery += ' AND StageName != null ';
             }
 
-            // 8) Expiry date filter
+            // 8)a Expiry date filter
             if (requireExpiryDate) {
                 Date todayValue = Date.today();
                 baseQuery += ' AND XLP_ExpiryRenewalDate__c != NULL ' +
                             ' AND XLP_ExpiryRenewalDate__c >= :todayValue';
             }
-            /*
+            
             // 8)b Inception Date Filter
             if (requireInceptionDate) {
                 Date todayValue = Date.today();
                 baseQuery += ' AND XLP_InceptionDate__c != NULL ' +
                             ' AND XLP_InceptionDate__c >= :todayValue';
-            }*/
+            }
 
             // 9) Sort
-            //baseQuery += ' ORDER BY ' + safeSortField + ' ' + safeSortDirection;
+            baseQuery += ' ORDER BY ' + safeSortField + ' ' + safeSortDirection;
 
             // 10) Execute
             system.debug('@@@>>>baseQuery ' + baseQuery);
