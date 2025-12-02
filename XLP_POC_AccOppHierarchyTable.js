@@ -7,14 +7,13 @@ import updateOpportunities from '@salesforce/apex/XLP_POC_AccOppHierarchyTable.u
 export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
 
     @api recordId;
-
-    // ---- Configurable from App Builder ----
     @api tableTitle;
     @api accountContextType;   // 'Broker' or 'Insured'
     @api pipelineType;         // 'Pipeline' | 'Renewal' | 'Both'
     @api newRenewalType;       // 'New' | 'Renewal' | 'Any'
     @api stageName;            // e.g. 'Bound'
     @api requireExpiryDate;    // true / false
+    @api requireInceptionDate;    // true / false
     @api sortField;            // e.g. XLP_GrossPremiumAXAXLAmount__c
     @api sortDirection;        // ASC / DESC
 
@@ -46,7 +45,7 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         this.buildColumns();
     }
 
-    // ----- BUILD COLUMNS SAFELY -----
+    // ----- BUILD COLUMNS -----
     buildColumns() {
         this.columnsDef = [];
 
@@ -111,6 +110,7 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         newRenewalType: '$newRenewalType',
         stageName: '$stageName',
         requireExpiryDate: '$requireExpiryDate',
+        requireInceptionDate: '$requireInceptionDate',
         sortField: '$sortField',
         sortDirection: '$sortDirection'
     })
@@ -118,7 +118,8 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
         this.wiredResult = result;
         const { data, error } = result;
         this.isLoading = false;
-
+        console.log('data');
+        console.log(data);
         if (data) {
             this.allData = data.map(opp => {
                 let relatedAccountId, relatedAccountName;
@@ -192,36 +193,37 @@ export default class XLP_POC_AccOppHierarchyTable extends LightningElement {
 
     // ----- INLINE SAVE -----
     async handleSave(event) {
-    this.isLoading = true;
-    const updatedFields = event.detail.draftValues;
-
-    try {
-        await updateOpportunities({ opportunities: updatedFields });
-
-        this.showToast(
-            'Success',
-            'Changes saved successfully',
-            'success'
-        );
-
-        //Clear drafts
-        this.draftValues = [];
-
-        //Reload from DB
-        await refreshApex(this.wiredResult);
-
-        } catch (error) {
+        this.isLoading = true;
+        const updatedFields = event.detail.draftValues;
+    
+        try {
+            await updateOpportunities({ opportunities: updatedFields });
     
             this.showToast(
-                'Error updating opportunities',
-                this.reduceError(error),
-                'error'
+                'Success',
+                'Changes saved successfully',
+                'success'
             );
     
-        } finally {
-            this.isLoading = false;
-        }
+            //Clear drafts
+            this.draftValues = [];
+    
+            //Reload from DB
+            await refreshApex(this.wiredResult);
+    
+            } catch (error) {
+        
+                this.showToast(
+                    'Error updating opportunities',
+                    this.reduceError(error),
+                    'error'
+                );
+        
+            } finally {
+                this.isLoading = false;
+            }
     }
+
     // ----- UTILITIES -----
     showToast(title, message, variant) {
         this.dispatchEvent(
